@@ -66,17 +66,17 @@ class Signer
         if (empty($node) || empty($root)) {
             throw SignerException::tagNotFound($tagname . ' ' . $rootname);
         }
-        if (!self::existsSignature($dom)) {
-            $xml = self::createSignature(
-                $certificate,
-                $dom,
-                $root,
-                $node,
-                $mark,
-                $algorithm,
-                $canonical
-            );
-        }
+        
+        $xml = self::createSignature(
+            $certificate,
+            $dom,
+            $root,
+            $node,
+            $mark,
+            $algorithm,
+            $canonical
+        );
+        
         return $xml->saveXML($xml->documentElement, LIBXML_NOXMLDECL);
     }
 

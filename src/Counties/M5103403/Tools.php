@@ -26,14 +26,14 @@ class Tools extends ToolsModel
      * @var array
      */
     protected $url = [
-        1 => 'http://www.issnetonline.com.br/webserviceabrasf/cuiaba/servicos.asmx',
+        1 => 'https://wscuiaba.issnetonline.com.br/webservicenfse204/nfse.asmx',
         2 => 'http://www.issnetonline.com.br/webserviceabrasf/homologacao/servicos.asmx'
     ];
     /**
      * County Namespace
      * @var string
      */
-    protected $xmlns = 'http://www.issnetonline.com.br/webservice/nfd';
+    protected $xmlns = 'http://nfse.abrasf.org.br';
 
     /**
      * Soap Version
@@ -66,12 +66,12 @@ class Tools extends ToolsModel
      */
     protected $namespaces = [
         1 => [
-            'xmlns:soapenv' => "http://schemas.xmlsoap.org/soap/envelope/",
-            'xmlns' => "http://www.issnetonline.com.br/webservice/nfd"
+            'xmlns:soapenv' => "http://schemas.xmlsoap.org/soap/envelope",
+            'xmlns' => "http://nfse.abrasf.org.br"
         ],
         2 => [
-            'xmlns:soap' => "http://www.w3.org/2003/05/soap-envelope",
-            'xmlns' => "http://www.issnetonline.com.br/webservice/nfd"
+            'xmlns:soap' => "http://schemas.xmlsoap.org/soap/envelope",
+            'xmlns' => "http://nfse.abrasf.org.br"
         ]
     ];
 }

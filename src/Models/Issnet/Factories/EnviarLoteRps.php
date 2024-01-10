@@ -17,28 +17,32 @@ class EnviarLoteRps extends Factory
         $method = 'EnviarLoteRpsEnvio';
         $xsd = 'servico_enviar_lote_rps_envio';
         $qtdRps = count($rpss);
-        $content = "<EnviarLoteRpsEnvio "
-            . "xmlns=\"http://www.issnetonline.com.br/webserviceabrasf/vsd/$xsd.xsd\" "
-            . "xmlns:tc=\"http://www.issnetonline.com.br/webserviceabrasf/vsd/tipos_complexos.xsd\">";
-        $content .= "<LoteRps>";
-        $content .= "<tc:NumeroLote>$lote</tc:NumeroLote>";
-        $content .= "<tc:CpfCnpj>";
+        $content = '<EnviarLoteRpsEnvio xmlns="http://www.abrasf.org.br/nfse.xsd">';
+        $content .= '<LoteRps Id="lote01" versao="2.04">';
+        $content .= "<NumeroLote>$lote</NumeroLote>";
+        $content .= '<Prestador>';
+        $content .= "<CpfCnpj>";
         if ($remetenteTipoDoc == '2') {
-            $content .= "<tc:Cnpj>$remetenteCNPJCPF</tc:Cnpj>";
+            $content .= "<Cnpj>$remetenteCNPJCPF</Cnpj>";
         } else {
-            $content .= "<tc:Cpf>$remetenteCNPJCPF</tc:Cpf>";
+            $content .= "<Cpf>$remetenteCNPJCPF</Cpf>";
         }
-        $content .= "</tc:CpfCnpj>";
-        $content .= "<tc:InscricaoMunicipal>$inscricaoMunicipal</tc:InscricaoMunicipal>";
-        $content .= "<tc:QuantidadeRps>$qtdRps</tc:QuantidadeRps>";
-        $content .= "<tc:ListaRps>";
+        $content .= "</CpfCnpj>";
+        $content .= "<InscricaoMunicipal>$inscricaoMunicipal</InscricaoMunicipal>";
+        $content .= "</Prestador>";
+        $content .= "<QuantidadeRps>$qtdRps</QuantidadeRps>";
+        $content .= "<ListaRps>";
         foreach ($rpss as $rps) {
-            $content .= RenderRPS::toXml($rps, $this->timezone, $this->algorithm);
+            //$content .= RenderRPS::toXml($rps, $this->timezone, $this->algorithm, $this->certificate);
+            $rps_xml = RenderRPS::toXml($rps, $this->timezone, $this->algorithm, $this->certificate);
+            $rps_assinado = Signer::sign($this->certificate, $rps_xml, 'Rps', '', $this->algorithm, [false, false, null, null]);
+            $content .= $rps_assinado;
         }
-        $content .= "</tc:ListaRps>";
+        $content .= "</ListaRps>";
         $content .= "</LoteRps>";
         $content .= "</EnviarLoteRpsEnvio>";
 
+        
         $body = Signer::sign(
             $this->certificate,
             $content,
@@ -47,8 +51,24 @@ class EnviarLoteRps extends Factory
             $this->algorithm,
             [false, false, null, null]
         );
+
         $body = $this->clear($body);
-        $this->validar($versao, $body, 'Issnet', $xsd, '');
-        return $body;
+
+        $msg = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:nfse="http://nfse.abrasf.org.br">';
+        $msg .= '<soapenv:Body>';
+        $msg .= '<nfse:RecepcionarLoteRps>';
+        $msg .= '<nfseCabecMsg>';
+        $msg .= '<cabecalho xmlns="http://www.abrasf.org.br/nfse.xsd" versao="2.04">';
+        $msg .= '<versaoDados>2.04</versaoDados>';
+        $msg .= '</cabecalho>';
+        $msg .= '</nfseCabecMsg>';
+        $msg .= '<nfseDadosMsg>';
+        $msg .= $body;
+        $msg .= '</nfseDadosMsg>';
+        $msg .= '</nfse:RecepcionarLoteRps>';
+        $msg .= '</soapenv:Body>';
+        $msg .= '</soapenv:Envelope>';
+
+        return $msg;
     }
 }

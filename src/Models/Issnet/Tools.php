@@ -48,29 +48,17 @@ class Tools extends ToolsBase
         if (!$url) {
             $url = $this->url[$this->config->tpAmb];
         }
-
         if (!is_object($this->soap)) {
             $this->soap = new \NFePHP\NFSe\Common\SoapCurl($this->certificate);
         }
-        //formata o xml da mensagem para o padão esperado pelo webservice
-        $dom = new \DOMDocument('1.0', 'UTF-8');
-        $dom->preserveWhiteSpace = false;
-        $dom->formatOutput = true;
-        $dom->loadXML($message);
-        $message = str_replace('<?xml version="1.0"?>', '<?xml version="1.0" encoding="UTF-8"?>', $dom->saveXML());
-
-        $messageText = $message;
-        if ($this->withcdata) {
-            $messageText = $this->stringTransform($message);
-        }
-        $request = "<" . $this->method . " xmlns=\"" . $this->xmlns . "\">"
-            . "<xml>$messageText</xml>"
-            . "</" . $this->method . ">";
+        
+        $request = $message;
         $params = [
             'xml' => $message
         ];
 
         $action = "\"" . $this->xmlns . "/" . $this->method . "\"";
+        //dd( $url, $this->method, $action, $this->soapversion, $params, $this->namespaces[$this->soapversion],$request);
         return $this->soap->send(
             $url,
             $this->method,
